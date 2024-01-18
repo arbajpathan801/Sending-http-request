@@ -1,26 +1,62 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
+import Loader from "./components/Loader";
 
 function App() {
   const [movies, setMovies] = useState([]);
+  const [isloading, setIsloading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const   fetchMoviesHandler = async () => {
-    const response=await fetch("https://swapi.dev/api/films/")
-     const data= await response.json();
-     
-        const movieData =data.results.map((movie) => {
-          return {
-            id: movie.epidode_id,
-            title: movie.title,
-            openingText: movie.opening_crawl,
-            releaseDate: movie.release_date,
-          };
-        });
-        setMovies(movieData);
-      
-  };
+  useEffect(() => {
+    fetchMoviesHandler();
+  }, [ useCallback]);
+
+  const fetchMoviesHandler =useCallback (async () => {
+    setIsloading(true);
+    setError(null);
+    try {
+      const response = await fetch("https://swapi.dev/api/films/");
+      if (!response.ok) {
+        console.log ('Please check the url bad request ',response.url)
+        throw Error("Something Went Wrong....Retry");
+      }
+      const data = await response.json();
+
+      const movieData = data.results.map((movie) => {
+        return {
+          id: movie.epidode_id,
+          title: movie.title,
+          openingText: movie.opening_crawl,
+          releaseDate: movie.release_date,
+        };
+      });
+      setMovies(movieData);
+    } catch (error) {
+      setError(error.message);
+    }
+
+    setIsloading(false);
+  },[])
+  
+
+  let content = <p>No Movie found</p>;
+  if (error) {
+    content = (
+      <div>
+        <p>{error}</p>
+        <button onClick={fetchMoviesHandler}>Retry</button>
+      </div>
+    );
+  }
+  if (movies.length > 0) {
+    content = <MoviesList movies={movies} />;
+  }
+  if (isloading) {
+    content = <Loader />
+  }
+ 
 
   // const dummyMovies = [
   //   {
@@ -42,9 +78,7 @@ function App() {
       <section>
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>
       </section>
-      <section>
-        <MoviesList movies={movies} />
-      </section>
+      <section>{content}</section>
     </React.Fragment>
   );
 }
