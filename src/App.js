@@ -10,9 +10,9 @@ function App() {
   const [isloading, setIsloading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchMoviesHandler();
-  }, [useCallback]);
+  // useEffect(() => {
+  //   fetchMoviesHandler();
+  // }, [fetchMoviesHandler]);
 
   const fetchMoviesHandler = useCallback(async () => {
     setIsloading(true);
@@ -26,25 +26,81 @@ function App() {
         throw Error("Something Went Wrong....Retry");
       }
       const data = await response.json();
-
-      const movieData = data.results.map((movie) => {
-        return {
-          id: movie.epidode_id,
-          title: movie.title,
-          openingText: movie.opening_crawl,
-          releaseDate: movie.release_date,
-        };
-      });
-      setMovies(movieData);
+      let loadMovie = [];
+      for (const key in data) {
+        loadMovie.push({
+          id: key,
+          title: data[key].title,
+          openingText: data[key].openingText,
+          releaseDate: data[key].releaseDate,
+        });
+      }
+      // const movieData = data.results.map((movie) => {
+      //   return {
+      //     id: movie.epidode_id,
+      //     title: movie.title,
+      //     openingText: movie.opening_crawl,
+      //     releaseDate: movie.release_date,
+      //   };
+      // });
+      setMovies(loadMovie);
     } catch (error) {
       setError(error.message);
     }
 
     setIsloading(false);
   }, []);
+  useEffect(() => {
+    fetchMoviesHandler();
+  }, [fetchMoviesHandler]);
 
-  const onAddMovie = (movie) => {
-    console.log(movie);
+  const onAddMovie = async (movie) => {
+    const {title,releaseDate,openingText}=movie
+    try {
+    if (!(title&&releaseDate&&openingText)){
+      alert('please fill all the fileds')
+      throw new Error('please fill all the fileds')
+    }
+        const response = await fetch(
+          "https://sending-http-78534-default-rtdb.asia-southeast1.firebasedatabase.app/movie.json",
+          {
+            method: "POST",
+            body: JSON.stringify(movie),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!response.ok){
+          throw new Error('Not able to add Movie')
+        }
+        fetchMoviesHandler();
+      
+      
+      // const Data = response.json();
+      // console.log(Data);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+  const onDelete = async (item) => {
+    const { id } = item;
+    console.log(id);
+    try {
+      const res = await fetch(
+        `https://sending-http-78534-default-rtdb.asia-southeast1.firebasedatabase.app/movie/${id}.json`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!res.ok){
+        throw new Error('something went wrong')
+      }
+      // const data = res.json();
+      // console.log(data);
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   let content = <p>No Movie found</p>;
@@ -57,7 +113,7 @@ function App() {
     );
   }
   if (movies.length > 0) {
-    content = <MoviesList movies={movies} />;
+    content = <MoviesList movies={movies} onDelete={onDelete} setMovies={setMovies} />;
   }
   if (isloading) {
     content = <Loader />;
