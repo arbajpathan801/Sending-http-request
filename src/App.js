@@ -1,9 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { Route,Routes } from "react-router-dom";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
 import Loader from "./components/Loader";
 import AddMovie from "./components/AddMovie";
+import AboutPage from "./components/Pages/AboutPage";
+import NavBar from "./components/NavBar";
+import MainPage from "./components/Pages/MainPage";
 
 function App() {
   const [movies, setMovies] = useState([]);
@@ -136,13 +140,29 @@ function App() {
 
   return (
     <React.Fragment>
-      <section>
+         <NavBar/>
+   
+    <Routes>
+    <Route path='/about' element= {<AboutPage/>}   >
+   
+      </Route>
+      <Route path='/' element={<MainPage onAddMovie={onAddMovie} onClick={fetchMoviesHandler} content={content}/>}>
+      
+    
+    {/* <section>
         <AddMovie onAddMovie={onAddMovie} />
       </section>
       <section>
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>
       </section>
-      <section>{content}</section>
+      <section>{content}</section> */}
+   
+      </Route>
+    </Routes>
+    
+      
+      
+  
     </React.Fragment>
   );
 }

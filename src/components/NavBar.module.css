@@ -1,0 +1,17 @@
+.header{
+    background: #14a3c0;
+    height: 60px;
+    margin: 2px auto;
+}
+.header nav{
+    padding-top: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+   font-weight: bold;
+   font-size: 20px;
+ 
+}
+
+
